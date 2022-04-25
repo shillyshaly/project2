@@ -25,10 +25,10 @@ func send(pkt *Packet, conn *net.UDPConn, addr net.Addr) (int, error) {
 	var n int
 	var err error
 	if addr == nil {
-		// sender, addr not needed
+		// for sender, addr not needed
 		n, err = conn.Write(buffer.Bytes())
 	} else {
-		// receiver, need to know who we are replying to
+		// for receiver, need to know who we are replying to
 		n, err = conn.WriteTo(buffer.Bytes(), addr)
 	}
 	return n, err

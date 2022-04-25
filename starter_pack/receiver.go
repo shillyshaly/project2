@@ -12,7 +12,7 @@ func receiver(filename *string, conn *net.UDPConn) int {
 	// recieve
 	for {
 		// TODO: receive DATA and send ACK if exepcted seqno arrives
-		// NOTE: Don't forget to write the data - DONE
+		// NOTE: Don't forget to write the data
 		// NOTE: You'll need the addr returned from recv in order to
 		// send back to the sender.
 		rcv, addr, ok := recv(conn, 0)
@@ -23,12 +23,15 @@ func receiver(filename *string, conn *net.UDPConn) int {
 			return 2
 		}
 
-		if rcv.hdr.seqno == expected {
-			pkt = make_ack_pkt(rcv.hdr.ackno)
-		}
-		send(pkt, conn, addr)
+		pkt = make_ack_pkt(rcv.hdr.ackno)
 
+		if rcv.hdr.seqno == expected {
+			send(pkt, conn, addr)
+		}
 		// TODO: break out of infinte loop after FINACK
+		if rcv.hdr.flag == FINACK {
+
+		}
 	}
 
 	return 0

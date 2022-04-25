@@ -30,7 +30,6 @@ func sender(filename *string, conn *net.UDPConn) int {
 		//get ack i think use recv
 	}
 	// TODO: send FIN and get FINACK
-	send(pkt, conn, nil)
 	// TODO: return 0 for success, 3 for failure
 	return 0
 }
