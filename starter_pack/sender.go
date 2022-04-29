@@ -27,9 +27,14 @@ func sender(filename *string, conn *net.UDPConn) int {
 		// TODO: send DATA and get ACK
 		//addr not needed for sender
 		send(pkt, conn, nil)
-		//get ack i think use recv
+
+		//rcv, addr, ok := recv(conn, 0)
+		//if isACK(rcv, seqno) {
+		//
+		//}
 	}
 	// TODO: send FIN and get FINACK
+	//need to recv pack and check if ack
 	// TODO: return 0 for success, 3 for failure
 	return 0
 }

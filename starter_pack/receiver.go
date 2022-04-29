@@ -29,8 +29,8 @@ func receiver(filename *string, conn *net.UDPConn) int {
 			send(pkt, conn, addr)
 		}
 		// TODO: break out of infinte loop after FINACK
-		if rcv.hdr.flag == FINACK {
-
+		if rcv.hdr.flag == FINACK && ok == true {
+			break
 		}
 	}
 
