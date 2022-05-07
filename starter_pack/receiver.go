@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"strconv"
 )
 
 func receiver(filename *string, conn *net.UDPConn) int {
@@ -18,36 +17,48 @@ func receiver(filename *string, conn *net.UDPConn) int {
 		// send back to the sender.
 
 		rcv, addr, ok := recv(conn, 0)
+		fmt.Printf("rcv.hdr.seqno: %d\n", rcv.hdr.seqno)
+		fmt.Printf("rcv.hdr.ackno: %d\n", rcv.hdr.ackno)
 
-		//write to file
-		f, err := os.OpenFile(*filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-		if err != nil {
-			panic(err)
-		}
-
-		defer f.Close()
-
-		if _, err = f.WriteString(string(rcv.dat)); err != nil {
-			panic(err)
-		}
-
-		pkt = make_ack_pkt(rcv.hdr.ackno)
-
-		if rcv.hdr.seqno == expected && ok {
-			//test print
-			fmt.Println("seqno: " + strconv.Itoa(int(rcv.hdr.seqno)))
-
-			//send ack
-			send(pkt, conn, addr)
-		}
-
-		// TODO: break out of infinte loop after FINACK
-		//if not corrupted and seqno == expected
 		if ok && rcv.hdr.seqno == expected {
+			//write to file
+			f, err := os.OpenFile(*filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+			if err != nil {
+				panic(err)
+			}
+
+			defer f.Close()
+
+			if _, err = f.WriteString(string(rcv.dat)); err != nil {
+				panic(err)
+			}
+			//end of write
+
+			fmt.Printf("expected: %d\n", expected)
+			pkt = make_ack_pkt(expected)
+			send(pkt, conn, addr)
+			expected += 1
+			fmt.Printf("New expected: %d\n", expected)
+		}
+
+		if ok && rcv.hdr.flag == FIN {
 			pkt := make_finack_pkt(expected)
 			send(pkt, conn, addr)
 			break
 		}
+
+		//pkt = make_ack_pkt(expected)
+		//
+		//if rcv.hdr.seqno == expected && ok {
+		//	//test print
+		//	fmt.Println("seqno: " + strconv.Itoa(int(rcv.hdr.seqno)))
+		//
+		//	//send ack
+		//	send(pkt, conn, addr)
+		//}
+
+		// TODO: break out of infinte loop after FINACK
+
 	}
 
 	return 0

@@ -22,14 +22,30 @@ func sender(filename *string, conn *net.UDPConn) int {
 			end = len(data)
 		}
 
-		pkt = make_data_pkt(data[start:end], seqno+255)
+		//make_pkt
+		pkt = make_data_pkt(data[start:end], seqno)
 
 		// TODO: send DATA and get ACK
-		n, _ := send(pkt, conn, nil)
+		send(pkt, conn, nil)
 
-		rcv, _, ok := recv(conn, n)
-		if ok && isACK(rcv, rcv.hdr.ackno) {
-			fmt.Println("success...")
+		rcv, _, ok := recv(conn, 10)
+		fmt.Printf("rcv.hdr.flag: %d\n", rcv.hdr.flag)
+		fmt.Printf("rcv.hdr.ackno: %d\n", rcv.hdr.ackno)
+
+		//if corrupt or not ack
+		if !(ok && isACK(rcv, seqno)) {
+			fmt.Printf("seqno: %d\n", seqno)
+			fmt.Println("not ack\n")
+			//i++
+			continue
+		}
+		//timeout
+		//not corrupt and is ack
+		if ok && isACK(rcv, seqno) {
+			rcv.hdr.flag = 1
+			seqno += 1
+			fmt.Printf("seqno now: %d\n", seqno)
+			//i++
 		}
 	}
 	// TODO: send FIN and get FINACK
